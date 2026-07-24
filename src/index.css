@@ -1,0 +1,57 @@
+/* src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+    @apply bg-gray-50;
+  }
+}
+
+@layer components {
+  .dmart-gradient {
+    background: linear-gradient(135deg, #c41230 0%, #e31837 50%, #ff1a3a 100%);
+  }
+
+  .dmart-card {
+    @apply bg-white/80 backdrop-blur-xl shadow-2xl border border-white/20;
+  }
+
+  .dmart-input {
+    @apply w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-white/80
+           focus:ring-2 focus:ring-red-500/40 focus:border-red-500
+           transition-all duration-200 outline-none text-gray-700
+           placeholder:text-gray-400 text-sm;
+  }
+
+  .dmart-btn {
+    @apply w-full py-3.5 px-6 rounded-xl font-semibold text-sm
+           transition-all duration-200 transform hover:scale-[1.02]
+           active:scale-[0.98] focus:outline-none focus:ring-4;
+  }
+
+  .dmart-btn-primary {
+    @apply dmart-btn bg-red-600 text-white hover:bg-red-700
+           focus:ring-red-500/50 shadow-lg shadow-red-500/25;
+  }
+
+  .dmart-btn-primary:disabled {
+    @apply opacity-70 cursor-not-allowed transform-none hover:bg-red-600;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-red-400 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-red-500;
+  }
+}
