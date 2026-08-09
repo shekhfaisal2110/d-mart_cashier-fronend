@@ -238,7 +238,7 @@ const AdminDashboard = () => {
         body: tableData,
         startY: 30,
         styles: { fontSize: 7 },
-        headStyles: { fillColor: [220, 38, 38] },
+        headStyles: { fillColor: [46, 125, 50] }, // green theme
         alternateRowStyles: { fillColor: [245, 245, 245] },
         columnStyles: {
           0: { cellWidth: 25 },
@@ -282,9 +282,9 @@ const AdminDashboard = () => {
           <button
             onClick={downloadCSV}
             disabled={downloading || filteredReports.length === 0}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium flex items-center gap-1 disabled:opacity-50"
+            className="dmart-btn dmart-btn-success disabled:opacity-50"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
             CSV
@@ -292,9 +292,9 @@ const AdminDashboard = () => {
           <button
             onClick={downloadPDF}
             disabled={downloading || filteredReports.length === 0}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium flex items-center gap-1 disabled:opacity-50"
+            className="dmart-btn dmart-btn-primary disabled:opacity-50"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9V3" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 15h6M9 19h2M9 11h6" />
@@ -304,7 +304,7 @@ const AdminDashboard = () => {
           {selectedCashier && (
             <button
               onClick={handleBack}
-              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition"
+              className="dmart-btn bg-gray-200 text-gray-700 hover:bg-gray-300"
             >
               ← Back
             </button>
@@ -313,94 +313,106 @@ const AdminDashboard = () => {
       </div>
 
       {/* Branch Filter */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border mb-6 flex flex-wrap items-end gap-4">
-        <div className="w-full sm:w-auto flex-1 min-w-[150px]">
-          <label className="block text-sm font-medium text-gray-600 mb-1">Branch</label>
-          <select
-            value={selectedBranch}
-            onChange={(e) => setSelectedBranch(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-500/40"
-          >
-            <option value="all">All Branches</option>
-            {branchOptions.filter(b => b !== 'all').map(branch => (
-              <option key={branch} value={branch}>{branch}</option>
-            ))}
-          </select>
-        </div>
-        <div className="text-xs text-gray-400">
-          {summaryData.length} cashiers
+      <div className="card mb-6">
+        <div className="card-body flex flex-wrap items-end gap-4">
+          <div className="w-full sm:w-auto flex-1 min-w-[150px]">
+            <label className="block text-sm font-medium text-gray-600 mb-1">Branch</label>
+            <select
+              value={selectedBranch}
+              onChange={(e) => setSelectedBranch(e.target.value)}
+              className="dmart-input"
+            >
+              <option value="all">All Branches</option>
+              {branchOptions.filter(b => b !== 'all').map(branch => (
+                <option key={branch} value={branch}>{branch}</option>
+              ))}
+            </select>
+          </div>
+          <div className="text-xs text-gray-400">
+            {summaryData.length} cashiers
+          </div>
         </div>
       </div>
 
       {/* Summary Cards (only when viewing all) */}
       {!selectedCashier && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white p-4 rounded-xl shadow-sm border">
-            <p className="text-sm text-gray-500">Total Bill</p>
-            <p className="text-2xl font-bold">₹{totalBill.toFixed(2)}</p>
+          <div className="card shadow-card-hover">
+            <div className="card-body">
+              <p className="text-sm text-gray-500">Total Bill</p>
+              <p className="text-2xl font-bold">₹{totalBill.toFixed(2)}</p>
+            </div>
           </div>
-          <div className="bg-white p-4 rounded-xl shadow-sm border">
-            <p className="text-sm text-gray-500">Total Received</p>
-            <p className="text-2xl font-bold">₹{totalReceived.toFixed(2)}</p>
+          <div className="card shadow-card-hover">
+            <div className="card-body">
+              <p className="text-sm text-gray-500">Total Received</p>
+              <p className="text-2xl font-bold">₹{totalReceived.toFixed(2)}</p>
+            </div>
           </div>
-          <div className="bg-white p-4 rounded-xl shadow-sm border border-green-200">
-            <p className="text-sm text-gray-500">Total Excess</p>
-            <p className="text-2xl font-bold text-green-600">+₹{totalExcess.toFixed(2)}</p>
+          <div className="card shadow-card-hover border-green-200">
+            <div className="card-body">
+              <p className="text-sm text-gray-500">Total Excess</p>
+              <p className="text-2xl font-bold text-green-600">+₹{totalExcess.toFixed(2)}</p>
+            </div>
           </div>
-          <div className="bg-white p-4 rounded-xl shadow-sm border border-red-200">
-            <p className="text-sm text-gray-500">Total Short</p>
-            <p className="text-2xl font-bold text-red-600">-₹{Math.abs(totalShort).toFixed(2)}</p>
+          <div className="card shadow-card-hover border-red-200">
+            <div className="card-body">
+              <p className="text-sm text-gray-500">Total Short</p>
+              <p className="text-2xl font-bold text-red-600">-₹{Math.abs(totalShort).toFixed(2)}</p>
+            </div>
           </div>
         </div>
       )}
 
       {/* Cashier Summary Table */}
       {!selectedCashier && (
-        <div className="bg-white rounded-xl shadow-sm border overflow-hidden mb-6">
-          <div className="px-4 py-3 bg-gray-50 border-b flex flex-wrap items-center justify-between gap-3">
+        <div className="card mb-6">
+          <div className="card-header flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-lg font-semibold text-gray-800">📊 Cashier Summary</h3>
             <span className="text-xs text-gray-400">Click an ID for details</span>
           </div>
           {loading ? (
-            <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600" /></div>
+            <div className="flex justify-center py-8">
+              <div className="spinner" />
+            </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 text-sm">
-                <thead className="bg-gray-50">
+            <div className="table-wrapper">
+              <table>
+                <thead>
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Branch</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Bill</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Received</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Net Var.</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Excess</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Short</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reports</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Report</th>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Branch</th>
+                    <th>Total Bill</th>
+                    <th>Received</th>
+                    <th>Net Var.</th>
+                    <th>Excess</th>
+                    <th>Short</th>
+                    <th>Reports</th>
+                    <th>Last Report</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody>
                   {summaryData.map((row) => (
                     <tr key={row.cashierId} onClick={() => handleCashierClick(row.cashierId)} className="cursor-pointer hover:bg-gray-50 transition">
-                      <td className="px-4 py-3 whitespace-nowrap font-medium text-red-600 hover:underline">{row.cashierId}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">{row.name}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">{row.branch || 'N/A'}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">₹{row.totalBill.toFixed(2)}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">₹{row.totalReceived.toFixed(2)}</td>
-                      <td className={`px-4 py-3 whitespace-nowrap font-medium ${row.totalVariance !== 0 ? 'text-red-600' : ''}`}>
+                      <td className="font-medium text-primary hover:underline">{row.cashierId}</td>
+                      <td>{row.name}</td>
+                      <td>{row.branch || 'N/A'}</td>
+                      <td>₹{row.totalBill.toFixed(2)}</td>
+                      <td>₹{row.totalReceived.toFixed(2)}</td>
+                      <td className={`font-medium ${row.totalVariance !== 0 ? 'text-red-600' : ''}`}>
                         {row.totalVariance > 0 ? `+${row.totalVariance.toFixed(2)}` : row.totalVariance.toFixed(2)}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-green-600">+₹{row.totalExcess.toFixed(2)}</td>
-                      <td className="px-4 py-3 whitespace-nowrap text-red-600">-₹{Math.abs(row.totalShort).toFixed(2)}</td>
-                      <td className="px-4 py-3 whitespace-nowrap text-center">{row.count}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">
+                      <td className="text-green-600">+₹{row.totalExcess.toFixed(2)}</td>
+                      <td className="text-red-600">-₹{Math.abs(row.totalShort).toFixed(2)}</td>
+                      <td className="text-center">{row.count}</td>
+                      <td>
                         {row.lastReportDate ? format(new Date(row.lastReportDate), 'dd MMM yyyy') : '-'}
                       </td>
                     </tr>
                   ))}
                   {summaryData.length === 0 && (
-                    <tr><td colSpan="10" className="px-4 py-8 text-center text-gray-500">No reports found</td></tr>
+                    <tr><td colSpan="10" className="py-8 text-center text-gray-500">No reports found</td></tr>
                   )}
                 </tbody>
               </table>
@@ -410,8 +422,8 @@ const AdminDashboard = () => {
       )}
 
       {/* Detailed Reports */}
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-        <div className="px-4 py-3 bg-gray-50 border-b flex flex-wrap items-center justify-between gap-3">
+      <div className="card">
+        <div className="card-header flex flex-wrap items-center justify-between gap-3">
           <h3 className="text-lg font-semibold text-gray-800">
             {selectedCashier
               ? `📋 Reports for ${selectedCashierName}`
@@ -419,78 +431,80 @@ const AdminDashboard = () => {
             <span className="text-sm font-normal text-gray-500 ml-2">({getMonthLabel()})</span>
           </h3>
           <div className="flex items-center gap-2">
-            <button onClick={goToPrevMonth} className="px-3 py-1 border rounded hover:bg-gray-100 transition text-sm">◀</button>
+            <button onClick={goToPrevMonth} className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 transition text-sm">◀</button>
             <span className="text-sm font-medium min-w-[120px] text-center">{getMonthLabel()}</span>
-            <button onClick={goToNextMonth} className="px-3 py-1 border rounded hover:bg-gray-100 transition text-sm">▶</button>
+            <button onClick={goToNextMonth} className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 transition text-sm">▶</button>
           </div>
         </div>
         {loadingDetails ? (
-          <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600" /></div>
+          <div className="flex justify-center py-8">
+            <div className="spinner" />
+          </div>
         ) : (
           <>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 text-sm">
-                <thead className="bg-gray-50">
+            <div className="table-wrapper">
+              <table>
+                <thead>
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                    <th>Date</th>
                     {!selectedCashier && (
                       <>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Branch</th>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Branch</th>
                       </>
                     )}
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bill</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cash</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">UPI</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Card</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Variance</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Notif.</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Charge</th>
+                    <th>Bill</th>
+                    <th>Cash</th>
+                    <th>UPI</th>
+                    <th>Card</th>
+                    <th>Total</th>
+                    <th>Variance</th>
+                    <th>Status</th>
+                    <th>Notif.</th>
+                    <th>Charge</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody>
                   {filteredReports.map((report) => (
                     <tr key={report._id} className={report.variance !== 0 ? 'bg-red-50' : ''}>
-                      <td className="px-4 py-3 whitespace-nowrap">{format(new Date(report.date), 'dd MMM yyyy')}</td>
+                      <td>{format(new Date(report.date), 'dd MMM yyyy')}</td>
                       {!selectedCashier && (
                         <>
-                          <td className="px-4 py-3 whitespace-nowrap font-medium">{report.cashierId}</td>
-                          <td className="px-4 py-3 whitespace-nowrap">{report.name}</td>
-                          <td className="px-4 py-3 whitespace-nowrap">{report.branch || 'N/A'}</td>
+                          <td className="font-medium">{report.cashierId}</td>
+                          <td>{report.name}</td>
+                          <td>{report.branch || 'N/A'}</td>
                         </>
                       )}
-                      <td className="px-4 py-3 whitespace-nowrap">₹{report.billAmount.toFixed(2)}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">₹{report.cash.toFixed(2)}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">₹{report.upi.toFixed(2)}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">₹{report.card.toFixed(2)}</td>
-                      <td className="px-4 py-3 whitespace-nowrap font-semibold">₹{report.totalAmount.toFixed(2)}</td>
-                      <td className={`px-4 py-3 whitespace-nowrap font-medium ${report.variance !== 0 ? 'text-red-600' : ''}`}>
+                      <td>₹{report.billAmount.toFixed(2)}</td>
+                      <td>₹{report.cash.toFixed(2)}</td>
+                      <td>₹{report.upi.toFixed(2)}</td>
+                      <td>₹{report.card.toFixed(2)}</td>
+                      <td className="font-semibold">₹{report.totalAmount.toFixed(2)}</td>
+                      <td className={`font-medium ${report.variance !== 0 ? 'text-red-600' : ''}`}>
                         {report.variance > 0 ? `+${report.variance.toFixed(2)}` : report.variance.toFixed(2)}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          report.isShort ? 'bg-red-100 text-red-700' :
-                          report.isExcess ? 'bg-orange-100 text-orange-700' :
-                          'bg-green-100 text-green-700'
+                      <td>
+                        <span className={`badge ${
+                          report.isShort ? 'badge-danger' :
+                          report.isExcess ? 'badge-warning' :
+                          'badge-success'
                         }`}>
                           {report.isShort ? 'Short' : report.isExcess ? 'Excess' : 'Match'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-center">{report.notified ? '✅' : '❌'}</td>
-                      <td className="px-4 py-3 whitespace-nowrap text-center">{report.charged ? '✅' : '❌'}</td>
+                      <td className="text-center">{report.notified ? '✅' : '❌'}</td>
+                      <td className="text-center">{report.charged ? '✅' : '❌'}</td>
                     </tr>
                   ))}
                   {filteredReports.length === 0 && (
-                    <tr><td colSpan={selectedCashier ? 11 : 14} className="px-4 py-8 text-center text-gray-500">No reports found</td></tr>
+                    <tr><td colSpan={selectedCashier ? 11 : 14} className="py-8 text-center text-gray-500">No reports found</td></tr>
                   )}
                 </tbody>
               </table>
             </div>
             {filteredReports.length > 0 && (
-              <div className="px-4 py-3 bg-gray-50 border-t">
+              <div className="card-footer">
                 <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
                   <span className="font-medium text-gray-700">📊 Totals {selectedCashier ? `for ${selectedCashierName}` : 'for all cashiers'}:</span>
                   <div className="flex flex-wrap gap-4">

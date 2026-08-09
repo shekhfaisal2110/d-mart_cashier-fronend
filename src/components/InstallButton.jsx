@@ -33,7 +33,7 @@ const InstallButton = () => {
   return (
     <button
       onClick={handleInstall}
-      className="fixed bottom-4 right-4 z-50 px-4 py-2 bg-red-600 text-white rounded-lg shadow-lg hover:bg-red-700 transition"
+      className="dmart-btn dmart-btn-primary shadow-lg shadow-primary/30 hover:shadow-primary/50 fixed bottom-6 right-6 z-50"
     >
       📲 Install App
     </button>

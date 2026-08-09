@@ -1,7 +1,7 @@
 // src/components/NotificationBell.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { format, parseISO, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
+import { format, parseISO, addMonths, subMonths } from 'date-fns';
 import { useRefresh } from '../context/RefreshContext';
 
 const NOTIFY_THRESHOLD = 1;
@@ -34,61 +34,71 @@ const NotificationBell = () => {
   const dropdownRef = useRef(null);
 
   const now = new Date();
-  const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
 
   const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
-  // Fetch notifications for the selected month
+  // Fetch notifications (closing reports + contact replies)
   const fetchNotifications = async () => {
     try {
       setLoading(true);
       const cashierId = localStorage.getItem('cashierId');
-      if (!cashierId) {
+      const token = localStorage.getItem('token');
+      if (!cashierId || !token) {
         setNotifications([]);
         setLoading(false);
         return;
       }
-      const monthStart = startOfMonth(new Date(selectedYear, selectedMonth, 1));
-      const monthEnd = endOfMonth(monthStart);
-      const startStr = format(monthStart, 'yyyy-MM-dd');
-      const endStr = format(monthEnd, 'yyyy-MM-dd');
 
-      const res = await axios.get(`${API_BASE}/closing`, {
+      // 1. Closing reports (custom month range)
+      const start = new Date(selectedYear, selectedMonth - 2, 26);
+      const end = new Date(selectedYear, selectedMonth - 1, 25);
+      const startStr = format(start, 'yyyy-MM-dd');
+      const endStr = format(end, 'yyyy-MM-dd');
+
+      const closingRes = await axios.get(`${API_BASE}/closing`, {
         params: { cashierId, startDate: startStr, endDate: endStr },
       });
-      const reports = res.data;
+      const reports = closingRes.data;
 
-      const notifs = reports
+      const closingNotifs = reports
         .filter(r => r.varianceAbs >= NOTIFY_THRESHOLD)
-        .map(r => {
-          let type, icon, message;
-          if (r.varianceAbs >= 500) {
-            type = 'reward';
-            icon = '🎉';
-            message = `🎉 Reward incentive! Variance ₹${r.varianceAbs.toFixed(2)}`;
-          } else if (r.varianceAbs >= 200) {
-            type = 'charge';
-            icon = '💳';
-            message = `💳 Charge applied! Variance ₹${r.varianceAbs.toFixed(2)}`;
-          } else {
-            type = 'notification';
-            icon = '🔔';
-            message = `🔔 Notification triggered! Variance ₹${r.varianceAbs.toFixed(2)}`;
-          }
-          return {
-            id: r._id,
-            date: r.date,
-            amount: r.varianceAbs,
-            type,
-            icon,
-            message,
-            read: localStorage.getItem(`notif_${r._id}`) === 'true',
-          };
-        })
+        .map(r => ({
+          id: `closing_${r._id}`,
+          date: r.date,
+          amount: r.varianceAbs,
+          type: 'closing',
+          icon: r.varianceAbs <= 500 ? '🎉' : r.varianceAbs >= 200 ? '💳' : '🔔',
+          message: `${r.varianceAbs <= 500 ? 'Reward' : r.varianceAbs >= 200 ? 'Charge' : 'Notification'}! Variance ₹${r.varianceAbs.toFixed(2)}`,
+          read: localStorage.getItem(`notif_closing_${r._id}`) === 'true',
+        }));
+
+      // 2. Contact messages (replies)
+      const contactRes = await axios.get(`${API_BASE}/contact/my-messages`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const contactMessages = contactRes.data.messages || [];
+
+      const contactNotifs = contactMessages
+        .filter(msg => msg.status === 'replied' && msg.adminReply)
+        .map(msg => ({
+          id: `contact_${msg._id}`,
+          date: msg.repliedAt || msg.createdAt,
+          amount: 0,
+          type: 'contact',
+          icon: '💬',
+          message: `Admin replied to "${msg.subject}": ${msg.adminReply.substring(0, 60)}${msg.adminReply.length > 60 ? '...' : ''}`,
+          read: localStorage.getItem(`notif_contact_${msg._id}`) === 'true',
+          // store full data for potential detail view
+          contactData: msg,
+        }));
+
+      // Combine & sort by date (newest first)
+      const all = [...closingNotifs, ...contactNotifs]
         .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-      setNotifications(notifs);
+      setNotifications(all);
     } catch (err) {
       console.error('Failed to fetch notifications', err);
     } finally {
@@ -114,8 +124,9 @@ const NotificationBell = () => {
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const markAsRead = (id) => {
-    localStorage.setItem(`notif_${id}`, 'true');
+  const markAsRead = (id, type) => {
+    const key = type === 'contact' ? `notif_contact_${id}` : `notif_closing_${id}`;
+    localStorage.setItem(key, 'true');
     setNotifications(prev =>
       prev.map(n => (n.id === id ? { ...n, read: true } : n))
     );
@@ -123,34 +134,36 @@ const NotificationBell = () => {
 
   const markAllAsRead = () => {
     notifications.forEach(n => {
-      localStorage.setItem(`notif_${n.id}`, 'true');
+      const key = n.type === 'contact' ? `notif_contact_${n.id.split('_')[1]}` : `notif_closing_${n.id.split('_')[1]}`;
+      localStorage.setItem(key, 'true');
     });
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   };
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
-  // Month navigation
   const goToPrevMonth = () => {
-    const newDate = subMonths(new Date(selectedYear, selectedMonth, 1), 1);
-    setSelectedMonth(newDate.getMonth());
+    const newDate = subMonths(new Date(selectedYear, selectedMonth - 1, 1), 1);
+    setSelectedMonth(newDate.getMonth() + 1);
     setSelectedYear(newDate.getFullYear());
   };
-
   const goToNextMonth = () => {
-    const newDate = addMonths(new Date(selectedYear, selectedMonth, 1), 1);
-    setSelectedMonth(newDate.getMonth());
+    const newDate = addMonths(new Date(selectedYear, selectedMonth - 1, 1), 1);
+    setSelectedMonth(newDate.getMonth() + 1);
     setSelectedYear(newDate.getFullYear());
   };
-
-  const monthLabel = format(new Date(selectedYear, selectedMonth, 1), 'MMMM yyyy');
+  const monthLabel = () => {
+    const start = new Date(selectedYear, selectedMonth - 2, 26);
+    const end = new Date(selectedYear, selectedMonth - 1, 25);
+    return `${format(start, 'dd MMM')} – ${format(end, 'dd MMM yyyy')}`;
+  };
 
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Bell Button */}
       <button
         onClick={toggleDropdown}
-        className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500/40"
+        className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40"
         aria-label="Notifications"
       >
         <BellIcon />
@@ -164,52 +177,37 @@ const NotificationBell = () => {
       {/* Dropdown */}
       {isOpen && (
         <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 md:w-96 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50">
-          {/* Header with month navigation */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50/50">
             <div className="flex items-center gap-2">
-              <button
-                onClick={goToPrevMonth}
-                className="p-1 rounded hover:bg-gray-200 transition-colors"
-                aria-label="Previous month"
-              >
+              <button onClick={goToPrevMonth} className="p-1 rounded hover:bg-gray-200 transition-colors" aria-label="Previous month">
                 <ChevronLeft />
               </button>
-              <span className="text-sm font-semibold text-gray-700 min-w-[100px] text-center">
-                {monthLabel}
+              <span className="text-sm font-semibold text-gray-700 min-w-[120px] text-center">
+                {monthLabel()}
               </span>
-              <button
-                onClick={goToNextMonth}
-                className="p-1 rounded hover:bg-gray-200 transition-colors"
-                aria-label="Next month"
-              >
+              <button onClick={goToNextMonth} className="p-1 rounded hover:bg-gray-200 transition-colors" aria-label="Next month">
                 <ChevronRight />
               </button>
             </div>
-            <button
-              onClick={markAllAsRead}
-              className="text-xs text-red-600 hover:text-red-700 font-medium transition-colors"
-            >
+            <button onClick={markAllAsRead} className="text-xs text-primary hover:text-primary-dark font-medium transition-colors">
               Mark all read
             </button>
           </div>
 
-          {/* Notification list */}
           <div className="max-h-80 overflow-y-auto">
             {loading ? (
-              <div className="flex justify-center py-6">
-                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-red-600" />
-              </div>
+              <div className="flex justify-center py-6"><div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary" /></div>
             ) : notifications.length === 0 ? (
               <div className="px-4 py-6 text-center text-sm text-gray-400">
-                No notifications for {monthLabel}
+                No notifications for {monthLabel()}
               </div>
             ) : (
               notifications.map((notif) => (
                 <div
                   key={notif.id}
-                  onClick={() => markAsRead(notif.id)}
+                  onClick={() => markAsRead(notif.id.split('_')[1], notif.type)}
                   className={`flex items-start gap-3 px-4 py-3 border-b border-gray-50 cursor-pointer hover:bg-gray-50 transition-colors ${
-                    !notif.read ? 'bg-red-50/30' : ''
+                    !notif.read ? 'bg-primary-50/30' : ''
                   }`}
                 >
                   <div className="text-xl flex-shrink-0 mt-0.5">{notif.icon}</div>
@@ -219,20 +217,15 @@ const NotificationBell = () => {
                       {format(parseISO(notif.date), 'dd MMM yyyy, HH:mm')}
                     </p>
                   </div>
-                  {!notif.read && (
-                    <span className="w-2 h-2 bg-red-500 rounded-full flex-shrink-0 mt-2" />
-                  )}
+                  {!notif.read && <span className="w-2 h-2 bg-red-500 rounded-full flex-shrink-0 mt-2" />}
                 </div>
               ))
             )}
           </div>
 
-          {/* Footer */}
           {notifications.length > 0 && (
             <div className="px-4 py-2 border-t border-gray-100 text-center">
-              <span className="text-xs text-gray-400">
-                {unreadCount} unread
-              </span>
+              <span className="text-xs text-gray-400">{unreadCount} unread</span>
             </div>
           )}
         </div>

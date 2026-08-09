@@ -159,7 +159,7 @@ const InstallApp = () => {
             <circle cx="12" cy="19" r="2" />
           </svg>
           {isInstallable && (
-            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
+            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-danger rounded-full animate-pulse" />
           )}
         </button>
 
@@ -174,7 +174,7 @@ const InstallApp = () => {
                   handleInstall();
                   setShowMenu(false);
                 }}
-                className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 transition hover:text-red-600"
+                className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 transition hover:text-primary"
               >
                 <span className="text-lg">📲</span>
                 <span className="font-medium">Install App</span>
@@ -210,7 +210,7 @@ const InstallApp = () => {
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-bounce-slow">
           <button
             onClick={handleInstall}
-            className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-2xl shadow-2xl shadow-red-500/30 hover:shadow-red-500/50 transition-all duration-300 hover:scale-105 active:scale-95"
+            className="dmart-btn dmart-btn-primary shadow-lg shadow-primary/30 hover:shadow-primary/50"
           >
             <span className="text-2xl">📲</span>
             <div className="text-left">
@@ -255,7 +255,7 @@ const InstallApp = () => {
                       onClick={() => setActiveDevice(dev)}
                       className={`flex flex-col items-center p-2 rounded-xl transition ${
                         activeDevice === dev
-                          ? 'bg-red-50 border-2 border-red-500 shadow-md'
+                          ? 'bg-primary-50 border-2 border-primary shadow-md'
                           : 'bg-gray-50 border-2 border-transparent hover:bg-gray-100'
                       }`}
                     >
@@ -281,7 +281,7 @@ const InstallApp = () => {
                   <ol className="space-y-2">
                     {deviceInfo.steps.map((step, index) => (
                       <li key={index} className="flex items-start gap-3 p-2 bg-gray-50 rounded-lg text-sm">
-                        <span className="flex-shrink-0 w-5 h-5 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-xs font-bold">
+                        <span className="flex-shrink-0 w-5 h-5 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-xs font-bold">
                           {index + 1}
                         </span>
                         <span className="text-gray-700">{step}</span>
@@ -310,14 +310,14 @@ const InstallApp = () => {
                       handleInstall();
                       setShowInstructions(false);
                     }}
-                    className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium flex items-center justify-center gap-2"
+                    className="dmart-btn dmart-btn-primary flex-1"
                   >
                     <span>📲</span> Install Now
                   </button>
                 )}
                 <button
                   onClick={() => setShowInstructions(false)}
-                  className={isInstallable ? 'px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-gray-600' : 'w-full px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-gray-600'}
+                  className={isInstallable ? 'dmart-btn bg-gray-200 text-gray-700 hover:bg-gray-300' : 'dmart-btn w-full bg-gray-200 text-gray-700 hover:bg-gray-300'}
                 >
                   Close
                 </button>
